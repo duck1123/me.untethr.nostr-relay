@@ -40,5 +40,9 @@ n.db*
 n-test.db*
 
 .cpcache
+.devspace
 dump
 scratch
+
+# User-specific configuration
+.envrc

@@ -1,0 +1,86 @@
+version: v2beta1
+name: me-untether-nostr-relay
+
+vars:
+  REPO:
+    default: "duck1123"
+  PROJECT:
+    default: "dinsro"
+  REPOSITORY_HOST:
+    default: "k3d-myregistry.localhost:12345"
+  RELAY_ADMIN_USERNAME:
+    default: ""
+  RELAY_CONTACT:
+    default: ""
+  RELAY_ADMIN_PUBKEY:
+    default: ""
+  RELAY_NAME:
+    default: ""
+  RELAY_HOST:
+    default: "relay.localhost"
+  RELAY_VERSION:
+    default: "0.2.3-SNAPSHOT"
+
+pipelines:
+  build:
+    build_images --all
+  build-app:
+    build_images app
+  dev: |-
+    echo "Running dev pipeline"
+  deploy: |-
+    echo "Deploying"
+    run_dependencies --all
+    build_images --all -t $(git describe --always)
+    create_deployments --all
+
+images:
+  app:
+    image: ${REPOSITORY_HOST}/${REPO}/${PROJECT}
+    custom:
+      command: |-
+        set -ex
+        earthly +image \
+          --REPO ${REPO} \
+          --PROJECT ${PROJECT} \
+          --TAG ${runtime.images.app.tag} \
+          --RELAY_VERSION ${RELAY_VERSION}
+        docker tag ${REPO}/${PROJECT}:${runtime.images.app.tag} ${runtime.images.app.image}:${runtime.images.app.tag}
+        docker push ${runtime.images.app.image}:${runtime.images.app.tag}
+        docker image rm ${REPO}/${PROJECT}:${runtime.images.app.tag}
+        docker image rm ${runtime.images.app.image}:${runtime.images.app.tag}
+
+deployments:
+  app:
+    helm:
+      chart:
+        name: me-untethr-nostr-relay
+        repo: https://chart.kronkltd.net/
+        version: 0.1.3
+        # name: ../chart.kronkltd.net/stable/me-untethr-nostr-relay
+      # valuesFiles:
+      #   - ./values.yaml
+      values:
+        image:
+          registry: ${REPOSITORY_HOST}
+          repository: ${REPO}/${PROJECT}
+          tag: "${runtime.images.app.tag}"
+
+dev:
+  app:
+    labelSelector:
+      app.kubernetes.io/name: relay
+      app.kubernetes.io/instance: app
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - command: git
+
+commands:
+  deploy:
+    command: devspace deploy
+  test:
+    command: make test
+  render-chart:
+    command: helm template untethr helm

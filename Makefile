@@ -4,7 +4,7 @@ clean:
 
 .PHONY: test
 test:
-	clj -X:test
+	clojure -X:test
 
 .PHONY: dependency-sources
 dependency-sources:
@@ -13,14 +13,14 @@ dependency-sources:
 
 .PHONY: run
 run:
-	clj \
+	clojure \
 		-J-Dlogback.configurationFile=conf/logback.xml \
 		-J-Xms1g -J-Xmx1g \
- 		-M -m me.untethr.nostr.app
+		-M -m me.untethr.nostr.app
 
 .PHONY: uberjar
 uberjar:
-	clj -M:uberdeps
+	clojure -M:uberdeps
 
 .PHONY: run-uberjar
 run-uberjar:

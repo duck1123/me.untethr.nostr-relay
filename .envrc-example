@@ -1,0 +1,13 @@
+# You shouldn't need to change these
+# export REPOSITORY_HOST=k3d-myregistry.localhost:12345
+# export REPO=duck1123
+# export PROJECT=me.untethr.nostr-relay
+
+# TODO: Read this from the official source
+export RELAY_VERSION=0.2.3-SNAPSHOT
+
+# Set these to your values
+export RELAY_HOST=relay.localhost
+export RELAY_CONTACT=someuser@example.com
+export RELAY_ADMIN_USERNAME=someuser
+export RELAY_ADMIN_PUBKEY=

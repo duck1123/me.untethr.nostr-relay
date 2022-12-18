@@ -1,0 +1,13 @@
+# .circleci/config.yml
+
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-2004:202111-02
+    steps:
+      - checkout
+      - run: docker login --username "$DOCKER_USER" --password "$DOCKER_PASS"
+      - run: "sudo /bin/sh -c 'wget https://github.com/earthly/earthly/releases/latest/download/earthly-linux-amd64 -O /usr/local/bin/earthly && chmod +x /usr/local/bin/earthly'"
+      - run: earthly --version
+      - run: earthly -P --remote-cache=duck1123/me.untethr.nostr-relay:cache --push +ci --RELAY_VERSION=0.2.4-SNAPSHOT
